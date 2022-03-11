@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Projekt_snake_canvas</title>
+  <meta name="Author" content="Maciej Grembski 3gg">
+  <link rel="stylesheet" href="stylll.css">
+</head>
+<body>
+<button id="bszybciej">szybciej</button>
+<canvas id="plan" width="800" height="608" ></canvas>
+<script>
+var wynik = 0;
+var nwynik = 0;
+var canvas = document.getElementById('plan');
+var context = canvas.getContext('2d');
+var grid = 16;
+var count = 0;
+var playing = false;
+var startButton;
+var snake = {
+  x: getRandomInt(10, 30) * grid,
+  y: getRandomInt(10, 30) * grid,
+  dx: grid,
+  dy: 0,
+  cells: [],
+  maxCells: 4
+};
+var btn = document.getElementById('bszybciej');
+btn.addEventListener("click", function(){ loop().init();});
+var japko = {
+  x: getRandomInt(0, 50) * grid,
+  y: getRandomInt(0, 38) * grid,
+};
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+function loop() {
+  requestAnimationFrame(loop);
+  if (++count < 20) {
+    return;
+  }
+  count = 0;
+  context.clearRect(0,0,canvas.width,canvas.height);
+  snake.x += snake.dx;
+  snake.y += snake.dy;
+  //Zawijanie krawędzi w pionie
+  if (snake.x < 0) {
+    snake.x = canvas.width - grid;
+  }
+  else if (snake.x >= canvas.width) {
+    snake.x = 0;
+  }
+  //Zawijanie krawędzi w poziomie
+  if (snake.y < 0) {
+    snake.y = canvas.height - grid;
+  }
+  else if (snake.y >= canvas.height) {
+    snake.y = 0;
+  }
+  
+
+  snake.cells.unshift({x: snake.x, y: snake.y});
+  if (snake.cells.length > snake.maxCells) {
+    snake.cells.pop();
+  }
+  //jabłko
+  context.fillStyle = 'red';
+  context.fillRect(japko.x, japko.y, grid-1, grid-1);
+  //wąż
+  context.fillStyle = 'orange';
+  snake.cells.forEach(function(cell, index) {
+    context.fillRect(cell.x, cell.y, grid-1, grid-1);
+    //pożera jabłko i zdobywa punkty
+    if (cell.x === japko.x && cell.y === japko.y) {
+      wynik++;
+      document.getElementById('wynik').innerHTML = "Wynik: " + wynik;
+      snake.maxCells++;
+      //800x608=16(50x38) 
+      japko.x = getRandomInt(0, 50) * grid;
+      japko.y = getRandomInt(0, 38) * grid;
+    }
+    //sprawdza kolizje
+    for (var i = index + 1; i < snake.cells.length; i++) {
+      if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+        alert ("Ugryzłeś swój ogon! Zjadłeś: " + wynik + " Jabłek");
+        wynik--;
+        document.getElementById('wynik').innerHTML = "Wynik: 0";
+        snake.x = 160;
+        snake.y = 160;
+        snake.cells = [];
+        snake.maxCells = 4;
+        snake.dx = grid;
+        snake.dy = 0;
+        japko.x = getRandomInt(0, 50) * grid;
+        japko.y = getRandomInt(0, 38) * grid;
+      }
+    }
+  });
+}
+//sterowanie
+document.addEventListener('keydown', function(e) {
+  //lewo
+  if (e.which === 37 && snake.dx === 0) {
+    snake.dx = -grid;
+    snake.dy = 0;
+  }
+  //góra
+  else if (e.which === 38 && snake.dy === 0) {
+    snake.dy = -grid;
+    snake.dx = 0;
+  }
+  //prawo
+  else if (e.which === 39 && snake.dx === 0) {
+    snake.dx = grid;
+    snake.dy = 0;
+  }
+  //dół
+  else if (e.which === 40 && snake.dy === 0) {
+    snake.dy = grid;
+    snake.dx = 0;
+  }
+});
+requestAnimationFrame(loop);
+</script>
+
+  <canvas id="canvas"></canvas>
+
+
+<p id="wynik">Wynik: 0</p>
+</body>
+</html>
